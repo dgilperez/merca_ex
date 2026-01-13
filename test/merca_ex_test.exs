@@ -134,42 +134,69 @@ defmodule MercaExTest do
     end
   end
 
+  @algolia_search_response %{
+    "hits" => [
+      %{
+        "id" => "10381",
+        "display_name" => "Leche semidesnatada Hacendado",
+        "brand" => "Hacendado",
+        "thumbnail" => "https://prod-mercadona.imgix.net/images/leche.jpg",
+        "price_instructions" => %{
+          "unit_price" => 5.28,
+          "reference_price" => 0.88,
+          "reference_format" => "L"
+        }
+      }
+    ],
+    "nbHits" => 45
+  }
+
   describe "search/2" do
-    test "searches products by query" do
-      expect(MercaEx.HTTPClientMock, :get, fn url, opts ->
-        assert url =~ "/products/"
-        assert opts[:params][:query] == "leche"
-        {:ok, %{status: 200, body: %{"results" => [@product_response]}}}
+    test "searches products via Algolia" do
+      expect(MercaEx.HTTPClientMock, :post, fn url, body, _opts ->
+        assert url =~ "algolia.net"
+        assert url =~ "products_prod_mad1_es"
+        assert body =~ "query=leche"
+        {:ok, %{status: 200, body: @algolia_search_response}}
       end)
 
       assert {:ok, products} = MercaEx.search("leche")
       assert length(products) == 1
+      assert hd(products).name == "Leche semidesnatada Hacendado"
     end
 
     test "accepts warehouse option" do
-      expect(MercaEx.HTTPClientMock, :get, fn _url, opts ->
-        assert opts[:params][:wh] == "mad1"
-        {:ok, %{status: 200, body: %{"results" => []}}}
+      expect(MercaEx.HTTPClientMock, :post, fn url, _body, _opts ->
+        assert url =~ "products_prod_bcn1_es"
+        {:ok, %{status: 200, body: @algolia_search_response}}
       end)
 
-      MercaEx.search("leche", warehouse: "mad1")
+      MercaEx.search("leche", warehouse: "bcn1")
     end
 
     test "accepts limit option" do
-      expect(MercaEx.HTTPClientMock, :get, fn _url, opts ->
-        assert opts[:params][:limit] == 10
-        {:ok, %{status: 200, body: %{"results" => []}}}
+      expect(MercaEx.HTTPClientMock, :post, fn _url, body, _opts ->
+        assert body =~ "hitsPerPage=10"
+        {:ok, %{status: 200, body: @algolia_search_response}}
       end)
 
       MercaEx.search("leche", limit: 10)
     end
 
     test "returns empty list when no results" do
-      expect(MercaEx.HTTPClientMock, :get, fn _url, _opts ->
-        {:ok, %{status: 200, body: %{"results" => []}}}
+      expect(MercaEx.HTTPClientMock, :post, fn _url, _body, _opts ->
+        {:ok, %{status: 200, body: %{"hits" => [], "nbHits" => 0}}}
       end)
 
       assert {:ok, []} = MercaEx.search("producto_inexistente_xyz")
+    end
+
+    test "returns error on Algolia failure" do
+      expect(MercaEx.HTTPClientMock, :post, fn _url, _body, _opts ->
+        {:error, %{reason: :timeout}}
+      end)
+
+      assert {:error, _} = MercaEx.search("leche")
     end
   end
 end

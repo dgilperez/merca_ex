@@ -111,7 +111,45 @@ MercaEx wraps the undocumented Mercadona API:
 - Categories: `GET /categories/`
 - Category products: `GET /categories/{id}/`
 - Product details: `GET /products/{id}/`
-- Search: Uses Algolia (App ID: `7UZJKL1DJ0`)
+- Search: Uses Algolia (see below)
+
+### Search API (Algolia)
+
+Mercadona uses [Algolia](https://www.algolia.com/) for product search. The Algolia credentials
+are public (embedded in Mercadona's web frontend JavaScript) and read-only.
+
+```
+App ID: 7UZJKL1DJ0
+API Key: 9d8f2e39e90df472b4f2e559a116fe17 (read-only)
+Index: products_prod_{warehouse}_es
+```
+
+#### Available Warehouses
+
+| Code | Region | Notes |
+|------|--------|-------|
+| `mad1` | Madrid | Default, recommended |
+| `mad2` | Madrid | Alternative, sometimes different prices |
+| `bcn1` | Barcelona | |
+| `vlc1` | Valencia | |
+| `vlc2` | Valencia | Limited catalog |
+| `svq1` | Sevilla | |
+| `alc1` | Alicante | |
+
+**Note**: Not all regions have dedicated warehouse codes. Users in regions like Galicia
+(A Coruña, Vigo, etc.) should use `mad1` as it has the most complete catalog.
+
+#### References
+
+This approach was documented by reverse-engineering Mercadona's web application:
+- [mercapy](https://github.com/jtayped/mercapy) - Python client (MIT License)
+- [Mercadona API Gist](https://gist.github.com/mdelapenya/7a7bf8e6f22d86d28ad3b5e3630b1343)
+
+## Disclaimer
+
+This library interacts with Mercadona's undocumented public API. It is not affiliated with,
+endorsed by, or connected to Mercadona S.A. in any way. Use at your own risk. The API
+may change without notice.
 
 ## License
 

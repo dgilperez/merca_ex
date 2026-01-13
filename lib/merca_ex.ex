@@ -28,7 +28,7 @@ defmodule MercaEx do
 
   """
 
-  alias MercaEx.{Category, Client, Product}
+  alias MercaEx.{Algolia, Category, Client, Product}
 
   @doc """
   Fetches all product categories.
@@ -115,44 +115,26 @@ defmodule MercaEx do
   end
 
   @doc """
-  Searches for products by query.
+  Searches for products by query using Algolia.
 
   ## Parameters
 
     - `query` - Search term
     - `opts` - Optional parameters:
-      - `:warehouse` - Warehouse code (e.g., "mad1")
-      - `:limit` - Maximum results to return
+      - `:warehouse` - Warehouse code (default: "mad1"). See `MercaEx.Algolia.available_warehouses/0`
+      - `:limit` - Maximum results to return (default: 20)
 
   ## Examples
 
       iex> {:ok, products} = MercaEx.search("leche")
-      iex> length(products)
-      10
+      iex> length(products) > 0
+      true
 
-      iex> {:ok, products} = MercaEx.search("leche", warehouse: "mad1", limit: 5)
+      iex> {:ok, products} = MercaEx.search("leche", warehouse: "bcn1", limit: 5)
 
   """
   @spec search(String.t(), keyword()) :: {:ok, [Product.t()]} | {:error, term()}
   def search(query, opts \\ []) do
-    params = build_search_params(query, opts)
-
-    case Client.get("/products/", params: params) do
-      {:ok, %{"results" => results}} ->
-        products = Enum.map(results, &Product.from_api/1)
-        {:ok, products}
-
-      {:error, _} = error ->
-        error
-    end
+    Algolia.search(query, opts)
   end
-
-  defp build_search_params(query, opts) do
-    %{query: query}
-    |> maybe_put(:wh, opts[:warehouse])
-    |> maybe_put(:limit, opts[:limit])
-  end
-
-  defp maybe_put(map, _key, nil), do: map
-  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 end
