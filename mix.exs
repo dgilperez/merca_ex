@@ -55,7 +55,8 @@ defmodule MercaEx.MixProject do
       links: %{
         "GitHub" => @source_url
       },
-      maintainers: ["David Gil"]
+      maintainers: ["David Gil"],
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE)
     ]
   end
 
