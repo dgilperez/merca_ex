@@ -13,7 +13,7 @@ defmodule MercaEx.MixProject do
       deps: deps(),
       # Hex.pm
       name: "MercaEx",
-      description: "Elixir client for the Mercadona API",
+      description: "Unofficial Elixir client for Mercadona's internal API",
       source_url: @source_url,
       homepage_url: @source_url,
       package: package(),
