@@ -1,0 +1,28 @@
+# Elixir/Mix
+/_build/
+/deps/
+*.ez
+*.beam
+
+# Generated
+erl_crash.dump
+*.plt
+*.plt.hash
+
+# Test
+/cover/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Mix lock (for libraries, optional to track)
+# mix.lock
